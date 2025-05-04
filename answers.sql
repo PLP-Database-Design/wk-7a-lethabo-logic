@@ -1,63 +1,43 @@
 -- question 1
-
--- Creating the original ProductDetail table
-CREATE TABLE ProductDetail (
+CREATE TABLE ProductDetail(
     OrderID INT,
-    CustomerName VARCHAR(100),
-    Products VARCHAR(255)
+    CustomerName VARCHAR(255),
+    Product VARCHAR(255)
 );
 
--- Inserting sample data
-INSERT INTO ProductDetail (OrderID, CustomerName, Products) VALUES
-(101, 'John Doe', 'Laptop, Mouse'),
-(102, 'Jane Smith', 'Tablet, Keyboard, Mouse'),
+INSERT INTO ProductDetail(OrderID, CustomerName, Product)
+VALUES
+(101, 'John Doe', 'Laptop'),
+(101, 'John Doe', 'Mouse'),
+(102, 'Jane Smith', 'Tablet'),
+(102, 'Jane Smith', 'Keyboard'),
+(102, 'Jane Smith', 'Mouse'),
 (103, 'Emily Clark', 'Phone');
 
--- Transforming the table into 1NF
-SELECT OrderID, CustomerName, TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(Products, ',', numbers.n), ',', -1)) AS Product
-FROM ProductDetail
-JOIN (
-    SELECT 1 AS n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5
-) numbers ON CHAR_LENGTH(Products) - CHAR_LENGTH(REPLACE(Products, ',', '')) >= numbers.n - 1
-ORDER BY OrderID, Product;
-
 -- question 2
-
--- Creating the OrderDetails table
-CREATE TABLE OrderDetails (
-    OrderID INT,
-    CustomerName VARCHAR(100),
-    Product VARCHAR(100),
-    Quantity INT
-);
-
--- Inserting sample data
-INSERT INTO OrderDetails (OrderID, CustomerName, Product, Quantity) VALUES
-(101, 'John Doe', 'Laptop', 2),
-(101, 'John Doe', 'Mouse', 1),
-(102, 'Jane Smith', 'Tablet', 3),
-(102, 'Jane Smith', 'Keyboard', 1),
-(102, 'Jane Smith', 'Mouse', 2),
-(103, 'Emily Clark', 'Phone', 1);
-
--- Creating a new table for Orders to remove partial dependency
-CREATE TABLE Orders (
+CREATE TABLE Customers (
     OrderID INT PRIMARY KEY,
-    CustomerName VARCHAR(100)
+    CustomerName VARCHAR(255)
 );
 
--- Inserting unique orders into the Orders table
-INSERT INTO Orders (OrderID, CustomerName)
-SELECT DISTINCT OrderID, CustomerName FROM OrderDetails;
+INSERT INTO Customers (OrderID, CustomerName)
+VALUES
+(101, 'John Doe'),
+(102, 'Jane Smith'),
+(103, 'Emily Clark');
 
--- Creating a new table for OrderItems to store product details
-CREATE TABLE OrderItems (
+CREATE TABLE OrderDetails(
     OrderID INT,
-    Product VARCHAR(100),
+    Product VARCHAR(255),
     Quantity INT,
-    FOREIGN KEY (OrderID) REFERENCES Orders(OrderID)
+    PRIMARY KEY (OrderID, Product)  
 );
 
--- Inserting product details into the OrderItems table
-INSERT INTO OrderItems (OrderID, Product, Quantity)
-SELECT OrderID, Product, Quantity FROM OrderDetails;
+INSERT INTO OrderDetails(OrderID, Product, Quantity)
+VALUES
+(101, 'Laptop', 2),
+(101, 'Mouse', 1),
+(102, 'Tablet', 3),
+(102, 'Keyboard', 1),
+(102, 'Mouse', 2),
+(103, 'Phone', 1);
